@@ -1,22 +1,25 @@
-[tool.poetry]
+[project]
 name = "rawxio"
-version = "0.0.0"
+dynamic = ["version"]
 description = "Import/Export rawx"
-authors = ["Statnett Datascience <Datascience.Drift@Statnett.no>"]
-repository = "https://github.com/statnett/rawxio.git"
+authors = [{name="Statnett Datascience", email="Datascience.Drift@Statnett.no"}]
+requires-python = ">=3.10"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pandas = "*"
+dependencies = [
+    "pandas>=2.2.3",
+]
 
-[tool.poetry.dev-dependencies]
-coverage = { version = "*", extras = ['toml'] }
-mock = "*"
-ruff = "*"
-pre-commit = "*"
-pytest = ">= 6"  # needs pyproject.toml support
-pytest-cov = "*"
-pytest-integration = "*"
+[tool.uv]
+dev-dependencies = [
+    "coverage[toml]>=7.6.1",
+    "pytest>=8.3.3",
+    "pytest-cov>=5.0.0",
+    "pytest-integration>=0.2.3",
+]
+
+[tool.setuptools_scm]
+version_scheme="release-branch-semver"
+local_scheme = "no-local-version"
 
 [tool.ruff]
 # Assume Python 3.10
@@ -134,7 +137,7 @@ precision = 2
 
 [tool.coverage.run]
 branch = true
-source = ["rawxio"]
+source = ["rawxio", "tests"]
 
 [tool.pytest.ini_options]
 log_file = "pytest.log"
@@ -147,7 +150,6 @@ markers = [
 filterwarnings = [
 ]
 
-
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"

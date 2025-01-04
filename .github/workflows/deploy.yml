@@ -2,39 +2,37 @@
 name: Deploy to PyPI
 
 on:
-  release:
-    types: [created]
+  workflow_call:
+    inputs:
+      build_docs:
+        required: false
+        type: boolean
+        default: false
+      deploy_docs:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-  Deploying:
+  build_and_publish_pypi:
     runs-on: ubuntu-latest
-
+    if: github.repository_owner == 'statnett'
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Python
+        uses: actions/setup-python@v5
         with:
           python-version: 3.10
-
-      - name: Get full python version
-        id: full-python-version
-        shell: bash
-        run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
-
-      - name: Install and configure Poetry
-        uses: abatilo/actions-poetry@v3.0.0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: build package
+        run: uv build
+      - name: Publish package distributions to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1.10
         with:
-          poetry-version: 1.8.3
-
-      - name: Install dynamic versioning
-        run: poetry self add "poetry-dynamic-versioning[plugin]"
-
-      - name: Install dependencies
-        shell: bash
-        run: poetry install
-
-      - name: Build and publish to PyPI
-        run: |
-          poetry config pypi-token.pypi ${{ secrets.pypi_push_token }}
-          poetry publish --build
+          repository-url: https://test.pypi.org/legacy/
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1.10  # Use v1.10 https://github.com/pypa/twine/pull/1172
